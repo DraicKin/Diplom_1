@@ -3,6 +3,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import praktikum.Bun;
 import praktikum.Burger;
@@ -15,6 +16,10 @@ public class BurgerTests {
     private final float BUN_PRICE = 15.0f;
     private final float INGR_PRICE = 6.0f;
     private final String INGR_NAME = "Кетчуп";
+    final String BUN_NAME = "Булочка Банни";
+    final String EXPECTED_RECEIPT
+            = String.format("(==== Булочка Банни ====)%n= sauce Кетчуп =%n(==== Булочка Банни ====)%n%nPrice: " +
+            "36,000000%n");
     @Mock
     Bun bun;
     @Mock
@@ -41,10 +46,6 @@ public class BurgerTests {
 
     @Test
     public void testGetRecipe() {
-        final String BUN_NAME = "Булочка Банни";
-        final String EXPECTED_RECEIPT
-              = String.format("(==== Булочка Банни ====)%n= sauce Кетчуп =%n(==== Булочка Банни ====)%n%nPrice: " +
-                "36,000000%n");
         // arrange
         Burger burger = setBurger(bun, ingredient);
         Mockito.when(bun.getName()).thenReturn(BUN_NAME);
@@ -56,5 +57,27 @@ public class BurgerTests {
         String actualReceipt = burger.getReceipt();
         //assert
         Assert.assertEquals("Неверный рецепт", EXPECTED_RECEIPT, actualReceipt);
+    }
+
+    @Test
+    public void testRemovesIngredient(){
+        Burger burger = setBurger(bun, ingredient);
+        burger.removeIngredient(0);
+        Assert.assertTrue("Didn't remove ingredient", burger.ingredients.isEmpty());
+    }
+
+
+    @Spy
+    Ingredient ingredientSpy1 = new Ingredient(IngredientType.SAUCE, "First", 5.0f);
+    @Spy
+    Ingredient ingredientSpy2 = new Ingredient(IngredientType.FILLING, "Second", 5.0f);
+    @Test
+    public void testMovesIngredient(){
+        Burger burger = new Burger();
+        burger.addIngredient(ingredientSpy1);
+        burger.addIngredient(ingredientSpy2);
+        burger.moveIngredient(0, 1);
+        Assert.assertEquals("Didn't move ingredients", "First",
+                burger.ingredients.get(1).name);
     }
 }
